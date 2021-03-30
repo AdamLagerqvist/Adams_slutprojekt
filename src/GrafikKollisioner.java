@@ -6,6 +6,10 @@ import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
 
 /**
  * This is a class
@@ -14,8 +18,9 @@ import java.io.IOException;
  * @author Magnus Silverdal
  */
 public class GrafikKollisioner extends Canvas implements Runnable{
-    private int width = 400;
-    private int height = 300;
+
+    private int width = 900;
+    private int height = 900;
 
     private Thread thread;
     int fps = 30;
@@ -23,17 +28,15 @@ public class GrafikKollisioner extends Canvas implements Runnable{
 
     private BufferStrategy bs;
 
-    private Rectangle house;
-    private int houseVX, houseVY;
+    private Collidable earth;
 
-    private Rectangle tree;
-    private int treeVX, treeVY;
+    private Collection<Asteroid> asteroids = new ArrayList<>();
 
-    private Rectangle mario;
-    private int marioVX, marioVY;
-
-    private BufferedImage marioimg;
-
+    private BufferedImage Earthimg;
+    private BufferedImage Space;
+    private BufferedImage Asteroidimg;
+    private Collection<Satelite> satelites = new ArrayList<>();
+    private double diffMult = 100;
 
     public GrafikKollisioner() {
         JFrame frame = new JFrame("A simple painting");
@@ -47,46 +50,48 @@ public class GrafikKollisioner extends Canvas implements Runnable{
         isRunning = false;
 
         try {
-            marioimg = ImageIO.read(new File("supermario2.png"));
+            Earthimg = ImageIO.read(new File("Earth.png"));
+            Space = ImageIO.read(new File("Space.png"));
+            Asteroidimg = ImageIO.read(new File("Asteroid.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        house = new Rectangle(300,150,50,50);
-        houseVX = 1;
-        houseVY = 0;
+        earth = new Collidable(new Rectangle(375,375,150,150));
 
-        tree  =  new Rectangle(400,200,20,40);
-        treeVX = 0;
-        treeVY = 0;
-
-        mario = new Rectangle(200,0,96,96);
-        marioVX = 2;
-        marioVY = 2;
     }
 
     public void update() {
-        house.x += houseVX;
-        if (house.x > width-house.width){
-            houseVX = -1;
-        }
-        if (house.x < 0 ) {
-            houseVX = 1;
-        }
-        mario.x += marioVX;
-        mario.y += marioVY;
-        if (mario.x < 0 || mario.x > width-80)
-            marioVX = -marioVX;
-        if (mario.y < 0 || mario.y > height-80)
-            marioVY = -marioVY;
+        spawnAsteroids();
+        Collection<Asteroid> asteroidsToRemove = new ArrayList<>();
+        asteroids.stream().forEach(asteroid -> {
+            asteroid.move();
+            if (checkEarthCollision(asteroid)) {
+                asteroidsToRemove.add(asteroid);
+            }
+            Optional<Satelite> collidingSatelite = checkCollisions(asteroid, satelites);
+            if (collidingSatelite.isPresent()) {
+                // Handle satelite collision.
+                // Add damage to satelite
+                // Destroy asteroid.
+                asteroidsToRemove.add(asteroid);
+            }
+        });
+        asteroids.removeAll(asteroidsToRemove);
+    }
 
-        // Det här är inte rätt studsning. Dels blir det åt fel håll, dels kan mario fastna i huset.
-        if (mario.intersects(house)) {
-            System.out.println("Hit!");
-                marioVX = -marioVX;
-                marioVY = -marioVY;
-
+    private void spawnAsteroids() {
+        if (Math.random() * diffMult >= 99.5){
+            asteroids.add(new Asteroid(Asteroid.randomDirection()));
         }
+    }
+
+    private boolean checkEarthCollision(Asteroid asteroid) {
+        return checkCollisions(asteroid, Collections.singleton(earth)).isPresent();
+    }
+
+    private <T extends Collidable> Optional<T> checkCollisions(Asteroid asteroid, Collection<T> collidables) {
+        return collidables.stream().filter(collidable -> collidable.intersects(asteroid)).findAny();
     }
 
     public void draw() {
@@ -97,20 +102,18 @@ public class GrafikKollisioner extends Canvas implements Runnable{
         }
         Graphics g = bs.getDrawGraphics();
 
-        //update();
-        g.setColor(Color.WHITE);
-        g.fillRect(0,0,width,height);
-        drawHouse(g, house.x,house.y);
-        drawTree(g, tree.x,tree.y);
-        drawTree(g, 100,200);
-        drawTree(g, 110,200);
-        drawTree(g, 120,200);
-        drawTree(g, 130,200);
-        drawTree(g, 140,200);
-        drawTree(g, 150,200);
-        g.drawImage(marioimg,mario.x,mario.y,mario.width,mario.height,null);
+        update();
+        g.drawImage(Space,0,0,900,900,null);
+        g.drawImage(Earthimg, earth.hitBox.x, earth.hitBox.y, earth.hitBox.width, earth.hitBox.height,null);
+        drawAsteroids(g, asteroids);
         g.dispose();
         bs.show();
+    }
+
+    private void drawAsteroids(Graphics g, Collection<Asteroid> asteroids) {
+        asteroids.stream().forEach(asteroid -> {
+            g.drawImage(Asteroidimg, asteroid.x(), asteroid.y(), asteroid.hitBox.width, asteroid.hitBox.height, null);
+        });
     }
 
     private void drawTree(Graphics g, int x, int y) {
@@ -181,32 +184,32 @@ public class GrafikKollisioner extends Canvas implements Runnable{
         @Override
         public void keyPressed(KeyEvent keyEvent) {
             if (keyEvent.getKeyChar() == 'a') {
-                treeVX = -5;
+
             }
             if (keyEvent.getKeyChar() == 'd') {
-                treeVX = 5;
+
             }
             if (keyEvent.getKeyChar() == 'w') {
-                treeVY = -5;
+
             }
             if (keyEvent.getKeyChar() == 's') {
-                treeVY = 5;
+
             }
         }
 
         @Override
         public void keyReleased(KeyEvent keyEvent) {
             if (keyEvent.getKeyChar() == 'a') {
-                treeVX = 0;
+
             }
             if (keyEvent.getKeyChar() == 'd') {
-                treeVX = 0;
+
             }
             if (keyEvent.getKeyChar() == 'w') {
-                treeVY = 0;
+
             }
             if (keyEvent.getKeyChar() == 's') {
-                treeVY = 0;
+
             }
         }
     }

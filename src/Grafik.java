@@ -7,12 +7,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-/**
- * This is a class
- * Created 2021-03-19
- *
- * @author Magnus Silverdal
- */
 public class Grafik extends Canvas implements Runnable{
     private int width = 800;
     private int height = 600;
