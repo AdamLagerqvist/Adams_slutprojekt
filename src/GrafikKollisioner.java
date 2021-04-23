@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 
-/**
+/*
  * This is a class
  * Created 2021-03-23
  *
@@ -23,7 +23,7 @@ public class GrafikKollisioner extends Canvas implements Runnable{
     private int height = 900;
 
     private Thread thread;
-    int fps = 30;
+    private int fps = 30;
     private boolean isRunning;
 
     private BufferStrategy bs;
@@ -32,13 +32,17 @@ public class GrafikKollisioner extends Canvas implements Runnable{
 
     private Collection<Asteroid> asteroids = new ArrayList<>();
 
-    private BufferedImage Earthimg;
-    private BufferedImage Space;
-    private BufferedImage Asteroidimg;
+    private BufferedImage earthImg;
+    private BufferedImage spaceImg;
+    private BufferedImage asteroidImg;
+    private BufferedImage sateliteImg;
     private Collection<Satelite> satelites = new ArrayList<>();
+    private double sateliteVelosity = 0;
     private double diffMult = 100;
 
     public GrafikKollisioner() {
+        satelites.add(new Satelite(Math.PI, 130));
+        satelites.add(new Satelite(2 * Math.PI, 130));
         JFrame frame = new JFrame("A simple painting");
         this.setSize(width,height);
         frame.add(this);
@@ -50,9 +54,10 @@ public class GrafikKollisioner extends Canvas implements Runnable{
         isRunning = false;
 
         try {
-            Earthimg = ImageIO.read(new File("Earth.png"));
-            Space = ImageIO.read(new File("Space.png"));
-            Asteroidimg = ImageIO.read(new File("Asteroid.png"));
+            earthImg = ImageIO.read(new File("Earth.png"));
+            spaceImg = ImageIO.read(new File("Space.png"));
+            asteroidImg = ImageIO.read(new File("Asteroid.png"));
+            sateliteImg = ImageIO.read(new File("Satellite.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -103,39 +108,24 @@ public class GrafikKollisioner extends Canvas implements Runnable{
         Graphics g = bs.getDrawGraphics();
 
         update();
-        g.drawImage(Space,0,0,900,900,null);
-        g.drawImage(Earthimg, earth.hitBox.x, earth.hitBox.y, earth.hitBox.width, earth.hitBox.height,null);
+        g.drawImage(spaceImg,0,0,900,900,null);
+        g.drawImage(earthImg, earth.hitBox.x, earth.hitBox.y, earth.hitBox.width, earth.hitBox.height,null);
         drawAsteroids(g, asteroids);
+        drawSatelites(g, satelites);
         g.dispose();
         bs.show();
     }
 
     private void drawAsteroids(Graphics g, Collection<Asteroid> asteroids) {
         asteroids.stream().forEach(asteroid -> {
-            g.drawImage(Asteroidimg, asteroid.x(), asteroid.y(), asteroid.hitBox.width, asteroid.hitBox.height, null);
+            g.drawImage(asteroidImg, asteroid.x(), asteroid.y(), asteroid.hitBox.width, asteroid.hitBox.height, null);
         });
     }
 
-    private void drawTree(Graphics g, int x, int y) {
-        g.setColor(new Color(0,128,0));
-        int[] xs = {0+x, 10+x, 20+x};
-        int[] ys = {30+y,0+y,30+y};
-        g.fillPolygon(xs,ys,3);
-        g.setColor(new Color(200,128,30));
-        g.fillRect(7+x,30+y,6,10);
-    }
-
-    private void drawHouse(Graphics g, int x, int y) {
-        g.setColor(new Color(0xAA1111));
-        g.fillRect(x, y, 50, 40);
-        g.setColor(new Color(0x444444));
-        int[] xcoords = {x-5, x + 25, x + 55};
-        int[] ycoords = {y, y - 25, y};
-        g.fillPolygon(xcoords, ycoords, 3);
-        g.fillRect(x+4,y+5,15,35);
-        g.drawRect(x+25,y+10,20,20);
-        g.setColor(new Color(0xFFA3DCFA));
-        g.fillRect(x+26,y+11,18,18);
+    private void drawSatelites(Graphics g, Collection<Satelite> satelites) {
+        satelites.stream().forEach(satelite -> {
+            g.drawImage(sateliteImg, satelite.x(), satelite.y(), satelite.hitBox.width, satelite.hitBox.height, null);
+        });
     }
 
     public static void main(String[] args) {
@@ -184,32 +174,34 @@ public class GrafikKollisioner extends Canvas implements Runnable{
         @Override
         public void keyPressed(KeyEvent keyEvent) {
             if (keyEvent.getKeyChar() == 'a') {
-
+                // switch satelite idel move direction
+                // speed up satelites while holding the key
             }
             if (keyEvent.getKeyChar() == 'd') {
-
+                // switch satelite idel move direction
+                // speed up satelites while holding the key
             }
             if (keyEvent.getKeyChar() == 'w') {
-
+                // make satelites move in a bigger circle around the earth (increase the radius)
             }
             if (keyEvent.getKeyChar() == 's') {
-
+                // make satelites move in a smaller circle around the earth (decrease the radius)
             }
         }
 
         @Override
         public void keyReleased(KeyEvent keyEvent) {
             if (keyEvent.getKeyChar() == 'a') {
-
+                // slow down the satelite to idle speed but preserve idle direction
             }
             if (keyEvent.getKeyChar() == 'd') {
-
+                // slow down the satelite to idle speed but preserve idle direction
             }
             if (keyEvent.getKeyChar() == 'w') {
-
+                // stop changing the radius
             }
             if (keyEvent.getKeyChar() == 's') {
-
+                // stop changing the radius
             }
         }
     }
