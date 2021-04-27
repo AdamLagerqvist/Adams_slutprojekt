@@ -17,7 +17,7 @@ import java.util.Optional;
  *
  * @author Magnus Silverdal
  */
-public class GrafikKollisioner extends Canvas implements Runnable{
+public class Basteroids extends Canvas implements Runnable{
 
     private int width = 900;
     private int height = 900;
@@ -29,18 +29,18 @@ public class GrafikKollisioner extends Canvas implements Runnable{
     private BufferStrategy bs;
 
     private Collidable earth;
-
     private Collection<Asteroid> asteroids = new ArrayList<>();
+    private Collection<Satelite> satelites = new ArrayList<>();
 
     private BufferedImage earthImg;
     private BufferedImage spaceImg;
     private BufferedImage asteroidImg;
     private BufferedImage sateliteImg;
-    private Collection<Satelite> satelites = new ArrayList<>();
+
     private double sateliteVelosity = 0;
     private double diffMult = 100;
 
-    public GrafikKollisioner() {
+    public Basteroids() {
         satelites.add(new Satelite(Math.PI, 130));
         satelites.add(new Satelite(2 * Math.PI, 130));
         JFrame frame = new JFrame("A simple painting");
@@ -129,7 +129,7 @@ public class GrafikKollisioner extends Canvas implements Runnable{
     }
 
     public static void main(String[] args) {
-        GrafikKollisioner painting = new GrafikKollisioner();
+        Basteroids painting = new Basteroids();
         painting.start();
     }
 
