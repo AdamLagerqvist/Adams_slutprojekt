@@ -10,6 +10,7 @@ public class Asteroid extends Collidable {
     static public double randomDirection() {
         return Math.random() * (2 * Math.PI);
     }
+
     public Asteroid(double direction) {
         super(new Rectangle((int)(initialRadius * Math.sin(direction) + 425), (int)(initialRadius * Math.cos(direction) + 425), 50, 50));
         radius = initialRadius;
