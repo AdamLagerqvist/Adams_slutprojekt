@@ -24,7 +24,7 @@ public class Basteroids extends Canvas implements Runnable{
 
     private Thread thread;
     private int fps = 30;
-    private boolean isRunning, isPlaying;
+    private boolean isRunning, isPlaying, isInInstuktions;
 
     private BufferStrategy bs;
 
@@ -41,8 +41,8 @@ public class Basteroids extends Canvas implements Runnable{
     private int sateliteVelosity2;
 
     public Basteroids() {
-        satelites.add(new Satelite(Math.PI, 130));
-        satelites.add(new Satelite(2 * Math.PI, 130));
+        satelites.add(new Satelite(Math.PI, 170));
+        satelites.add(new Satelite(2 * Math.PI, 170));
         JFrame frame = new JFrame("A simple painting");
         this.setSize(width,height);
         frame.add(this);
@@ -53,6 +53,7 @@ public class Basteroids extends Canvas implements Runnable{
 
         isRunning = false;
         isPlaying = false;
+        isInInstuktions = false;
 
         try {
             earthImg = ImageIO.read(new File("Earth.png"));
@@ -95,8 +96,8 @@ public class Basteroids extends Canvas implements Runnable{
     private ArrayList<Integer> getHighscores(){
         ArrayList<Integer> Highscores = new ArrayList<>();
         try {
-            File Highscore = new File("Highscore.txt");
-            Scanner fileReader = new Scanner(Highscore);
+            File scoreFile = new File("Highscore.txt");
+            Scanner fileReader = new Scanner(scoreFile);
             while (fileReader.hasNextLine()) {
                 Highscores.add(fileReader.nextInt());
             }
@@ -133,6 +134,7 @@ public class Basteroids extends Canvas implements Runnable{
     }
 
     private void satelitesMove() {
+
         if (sateliteVelosity > sateliteTargetVelosity){
             sateliteVelosity -= 1;
         }else if(sateliteVelosity < sateliteTargetVelosity) {
@@ -141,7 +143,9 @@ public class Basteroids extends Canvas implements Runnable{
         System.out.println(sateliteVelosity);
         satelites.stream().forEach(Satelite -> {
                 Satelite.setDirection(Satelite.getDirection() + Math.toRadians(sateliteVelosity/10.0));
-                Satelite.setRadius(Satelite.getRadius() + sateliteVelosity2);
+                if (Satelite.getRadius() + sateliteVelosity2 > 120 && Satelite.getRadius() + sateliteVelosity2 < 300) {
+                    Satelite.setRadius(Satelite.getRadius() + sateliteVelosity2);
+                }
                 Satelite.move();
     });
     }
@@ -177,16 +181,31 @@ public class Basteroids extends Canvas implements Runnable{
         if (!isPlaying) {
             g.setColor(Color.YELLOW);
             g.drawImage(spaceImg, 0, 0, 900, 900, null);
-            g.setFont(new Font("Trebuchet MS", Font.BOLD, 100));
-            g.drawString("Basteroids", 220, 110);
-            g.setFont(new Font("Trebuchet MS", Font.BOLD, 70));
-            g.drawString("press space to play", 150, 850);
-            g.setColor(new Color(255, 81, 0));
-            g.drawString("Highscores", 50, 180);
-            g.setFont(new Font("Trebuchet MS", Font.BOLD, 50));
-            ArrayList<Integer> Scores = getHighscores();
-            for (int i = 0; i < Scores.size(); i++) {
-                g.drawString(Scores.get(i) + "", 50, (i * 50) + 240);
+            if (isInInstuktions){
+                g.setFont(new Font("Trebuchet MS", Font.BOLD, 50));
+                g.drawString("Play by destroying asteroids by", 50,110);
+                g.drawString("crashing your satelites in to them", 50,150);
+                g.drawString("Control your satelites with WASD", 50,210);
+                g.drawString("D = go right", 50,250);
+                g.drawString("A = go left", 50,290);
+                g.drawString("W = expand satelite radius", 50,330);
+                g.drawString("S = shrink satelite radius", 50,370);
+                g.drawString("press h to return to title screen", 135, 780);
+            }
+            if(!isInInstuktions){
+                g.setFont(new Font("Trebuchet MS", Font.BOLD, 100));
+                g.drawString("Basteroids", 220, 110);
+                g.setFont(new Font("Trebuchet MS", Font.BOLD, 70));
+                g.drawString("press space to play", 150, 850);
+                g.setFont(new Font("Trebuchet MS", Font.BOLD, 50));
+                g.drawString("press h to learn how to play", 135, 780);
+                g.setColor(new Color(255, 81, 0));
+                g.drawString("Highscores", 50, 180);
+                g.setFont(new Font("Trebuchet MS", Font.BOLD, 50));
+                ArrayList<Integer> Scores = getHighscores();
+                for (int i = 0; i < Scores.size(); i++) {
+                    g.drawString(Scores.get(i) + "", 50, (i * 50) + 240);
+                }
             }
         }
         g.dispose();
@@ -246,7 +265,16 @@ public class Basteroids extends Canvas implements Runnable{
         @Override
         public void keyTyped(KeyEvent keyEvent) {
             if (keyEvent.getKeyChar() == ' '){
-                isPlaying = true;
+                if(!isInInstuktions) {
+                    isPlaying = true;
+                }
+            }
+            if (keyEvent.getKeyChar() == 'h'){
+                if (!isPlaying && !isInInstuktions) {
+                    isInInstuktions = true;
+                } else if (!isPlaying && isInInstuktions){
+                    isInInstuktions = false;
+                }
             }
         }
 
