@@ -40,6 +40,7 @@ public class Basteroids extends Canvas implements Runnable{
     private int sateliteTargetVelosity = 3;
     private int sateliteVelosity2;
 
+    /* Startar programmet */
     public Basteroids() {
         satelites.add(new Satelite(Math.PI, 170));
         satelites.add(new Satelite(2 * Math.PI, 170));
@@ -56,10 +57,10 @@ public class Basteroids extends Canvas implements Runnable{
         isInInstuktions = false;
 
         try {
-            earthImg = ImageIO.read(new File("Earth.png"));
-            spaceImg = ImageIO.read(new File("Space.png"));
-            asteroidImg = ImageIO.read(new File("Asteroid.png"));
-            sateliteImg = ImageIO.read(new File("Satellite.png"));
+            earthImg = ImageIO.read(new File("src/Earth.png"));
+            spaceImg = ImageIO.read(new File("src/Space.png"));
+            asteroidImg = ImageIO.read(new File("src/Asteroid.png"));
+            sateliteImg = ImageIO.read(new File("src/Satellite.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -68,10 +69,12 @@ public class Basteroids extends Canvas implements Runnable{
 
     }
 
+    /* Det som lopas i is running.
+    (Uppdaterar possition med mera kallar ochså draw metoden) */
     public void update() {
         if(isPlaying) {
             satelitesMove();
-            spawnAsteroids();
+            spawnAsteroid();
             asteroids.stream().forEach(asteroid -> {
                 asteroid.move();
                 if (checkEarthCollision(asteroid)) {
@@ -93,10 +96,12 @@ public class Basteroids extends Canvas implements Runnable{
 
         }
     }
+
+    /* Returnar en Integer Arraylist med highscores från filen txt highscore */
     private ArrayList<Integer> getHighscores(){
         ArrayList<Integer> Highscores = new ArrayList<>();
         try {
-            File scoreFile = new File("Highscore.txt");
+            File scoreFile = new File("src/Highscore.txt");
             Scanner fileReader = new Scanner(scoreFile);
             while (fileReader.hasNextLine()) {
                 Highscores.add(fileReader.nextInt());
@@ -108,6 +113,8 @@ public class Basteroids extends Canvas implements Runnable{
         }
         return Highscores;
     }
+
+    /* Hanterar vad som händer när man förlorar */
     private void loose() {
             ArrayList<Integer> scores = getHighscores();
             scores.add(score);
@@ -133,6 +140,7 @@ public class Basteroids extends Canvas implements Runnable{
         isPlaying = false;
     }
 
+    /* Flyttar satteliterna */
     private void satelitesMove() {
 
         if (sateliteVelosity > sateliteTargetVelosity){
@@ -150,20 +158,25 @@ public class Basteroids extends Canvas implements Runnable{
     });
     }
 
-    private void spawnAsteroids() {
+    /* Spawnar en astereoid som kommer från ett random håll */
+    private void spawnAsteroid() {
         if (Math.random() * 100 >= diffMult){
             asteroids.add(new Asteroid(Asteroid.randomDirection()));
         }
     }
 
+    /* kollar om det finns något som kolliderar med jorden */
     private boolean checkEarthCollision(Asteroid asteroid) {
         return checkCollisions(asteroid, Collections.singleton(earth)).isPresent();
     }
 
+    /* Används av andra metoder för att kolla kolitioner mellan
+    en asteroid och en lista med collidebles/cirklar */
     private <T extends Collidable> Optional<T> checkCollisions(Asteroid asteroid, Collection<T> collidables) {
         return collidables.stream().filter(collidable -> collidable.intersects(asteroid)).findAny();
     }
 
+    /* Ritar all grafik */
     public void draw() {
         bs = getBufferStrategy();
         if (bs == null) {
@@ -212,29 +225,34 @@ public class Basteroids extends Canvas implements Runnable{
         bs.show();
     }
 
+    /* Används av draw funktionen för att rita alla asteroider */
     private void drawAsteroids(Graphics g, Collection<Asteroid> asteroids) {
         asteroids.stream().forEach(asteroid -> {
             g.drawImage(asteroidImg, asteroid.x(), asteroid.y(), asteroid.hitBox.width, asteroid.hitBox.height, null);
         });
     }
 
+    /* Används av draw funktionen för att rita alla sateliter */
     private void drawSatelites(Graphics g, Collection<Satelite> satelites) {
         satelites.stream().forEach(satelite -> {
             g.drawImage(sateliteImg, satelite.x(), satelite.y(), satelite.hitBox.width, satelite.hitBox.height, null);
         });
     }
 
+    /* startar en ny instans */
     public static void main(String[] args) {
         Basteroids painting = new Basteroids();
         painting.start();
     }
 
+    /* startar threaden och sätter sedan isrunning till true */
     public synchronized void start() {
         thread = new Thread(this);
         isRunning = true;
         thread.start();
     }
 
+    /* Stoppar threaden och sätter isrunning till false */
     public synchronized void stop() {
         isRunning = false;
         try {
@@ -244,6 +262,7 @@ public class Basteroids extends Canvas implements Runnable{
         }
     }
 
+    /* gör så att grafiken blandannat fungerar */
     @Override
     public void run() {
         double deltaT = 1000.0/fps;
@@ -261,6 +280,7 @@ public class Basteroids extends Canvas implements Runnable{
         stop();
     }
 
+    /* Används för att göra så att man kan styra saker med tangentbordet */
     private class KL implements KeyListener {
         @Override
         public void keyTyped(KeyEvent keyEvent) {
@@ -325,6 +345,7 @@ public class Basteroids extends Canvas implements Runnable{
         }
     }
 
+    /* resten gör inget */
     private class ML implements MouseListener {
 
         @Override

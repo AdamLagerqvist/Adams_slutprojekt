@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="GrafikTE19:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/GrafikTE19_jar</output-path>
+    <root id="archive" name="GrafikTE19.jar">
+      <element id="module-output" name="GrafikTE19" />
+    </root>
+  </artifact>
+</component>
