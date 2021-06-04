@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URL;
 import java.util.*;
 
 /*
@@ -17,6 +18,8 @@ import java.util.*;
  * @author Bagnus Silverdal
  */
 public class Basteroids extends Canvas implements Runnable{
+
+    ClassLoader cl = this.getClass().getClassLoader();
 
     private int width = 900;
     private int height = 900;
@@ -57,10 +60,10 @@ public class Basteroids extends Canvas implements Runnable{
         isInInstuktions = false;
 
         try {
-            earthImg = ImageIO.read(new File("src/Earth.png"));
-            spaceImg = ImageIO.read(new File("src/Space.png"));
-            asteroidImg = ImageIO.read(new File("src/Asteroid.png"));
-            sateliteImg = ImageIO.read(new File("src/Satellite.png"));
+            earthImg = ImageIO.read(cl.getResource("images/Earth.png"));
+            spaceImg = ImageIO.read(cl.getResource("images/Space.png"));
+            asteroidImg = ImageIO.read(cl.getResource("images/Asteroid.png"));
+            sateliteImg = ImageIO.read(cl.getResource("images/Satellite.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -101,14 +104,13 @@ public class Basteroids extends Canvas implements Runnable{
     private ArrayList<Integer> getHighscores(){
         ArrayList<Integer> Highscores = new ArrayList<>();
         try {
-            File scoreFile = new File("src/Highscore.txt");
-            Scanner fileReader = new Scanner(scoreFile);
+            URL scoreFile = cl.getResource("Highscore/Highscore.txt");
+            Scanner fileReader = new Scanner(scoreFile.openStream());
             while (fileReader.hasNextLine()) {
                 Highscores.add(fileReader.nextInt());
             }
             fileReader.close();
-        }catch (FileNotFoundException e) {
-            System.out.println("An error occurred.");
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return Highscores;
@@ -120,7 +122,7 @@ public class Basteroids extends Canvas implements Runnable{
             scores.add(score);
             Collections.sort(scores);
         try {
-            FileWriter myWriter = new FileWriter("Highscore.txt");
+            FileWriter myWriter = new FileWriter("Highscore/Highscore.txt");
             for (int i = scores.size()-1;i > 0;i--){
                 if(1 != i) {
                     myWriter.write(scores.get(i) + "\n");
